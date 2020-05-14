@@ -4,6 +4,6 @@ This is the repo for our SPICE project.
 </p>
 
 <p>
-Created by: Youngmin Song and Mihai-Catalin Stretcu
+Created by: Youngmin Song and Mihai-Catalin Stretcu<br/>
 Department of Electrical and Electronic Engineering, Imperial College London
 </p>
