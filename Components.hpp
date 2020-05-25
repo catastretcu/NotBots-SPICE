@@ -21,7 +21,7 @@ protected:
     string n1, n2;
     double resistance;
 public:
-    Resistor();
+    Resistor(stringstream &ss);
     ~Resistor();
 }
 
@@ -31,7 +31,7 @@ protected:
     string n1, n2;
     double capacitance;
 public:
-    Capacitor();
+    Capacitor(stringstream &ss);
     ~Capacitor();
 }
 
@@ -41,7 +41,7 @@ protected:
     string n1, n2;
     double inductance;
 public:
-    Inductor();
+    Inductor(stringstream &ss);
     ~Inductor();
 }
 
@@ -51,7 +51,7 @@ protected:
     string np, nm;
     double V;
 public:
-    vSource();
+    vSource(stringstream &ss);
     ~vSource();
 }
 
@@ -61,7 +61,7 @@ protected:
     string nin, nout;
     double I;
 public:
-    iSource();
+    iSource(stringstream &ss);
     ~iSource();
 }
 
