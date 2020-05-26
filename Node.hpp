@@ -8,7 +8,9 @@
 #include <cmap>
 #include <utility>
 
-class Node
+using namespace std;
+
+class Nodes
 {
 private:
     map<pair<string, string>, vector<Component>> Branch;
