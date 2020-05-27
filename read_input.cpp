@@ -4,18 +4,30 @@
 #include <cstring>
 #include <sstream>
 #include <cmath>
+#include <utility>
 
 using namespace std;
+
+//helper function for function map_circuit -> without transistor support
+pair<string, string> read_nodes(string &line)
+{
+    stringstream ss(line);
+    string first_node, second_node;
+    
+    getline(ss, first_node, ' ');
+    
+    getline(ss, first_node, ' ');
+    getline(ss, second_node, ' ');
+    
+    return make_pair(first_node, second_node);
+}
 
 //creates a specific component object from a line of input
 Component create_component(string &line)
 {
-    stringstream ss(line), check_type(line);
-    string word;
+    stringstream ss(line);
     
-    getline(check_type, word, ' ');
-    
-    switch (word[0])
+    switch (line[0])
     {
         case 'R':
             Resistor res(ss);
@@ -31,21 +43,19 @@ Component create_component(string &line)
             return choose_source(line, ss);
         case 'I':
             return choose_source(line, ss);
+            
+        //add diode and transistor support;
     }
 }
 
-//this function is kinda redundant, can be modified and moved to Nodes.hpp or modified for input directly
-Nodes create_nodes(string &line)
+//function used for direct input
+Nodes map_circuit()
 {
-    stringstream ss(line);
-    string first_node, second_node;
+    Nodes circuit;
+    string line;
     
-    getline(ss, first_node, ' ');
-    getline(ss, first_node, ' ');
-    getline(ss, second_node, ' ');
+    while(getline(cin, line))
+        circuit.add_branch(read_nodes(line), create_component(line));
     
-    Nodes N;
-    N.add_branch(make_pair(first_node, second_node), create_component(line));
-    
-    return N;
+    return circuit;
 }

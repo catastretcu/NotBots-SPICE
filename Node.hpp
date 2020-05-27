@@ -10,6 +10,7 @@
 
 using namespace std;
 
+//can be modified to resemble a matrix by adding components at both a[i][j] and a[j][i] nodes in inverse order
 class Nodes
 {
 private:
