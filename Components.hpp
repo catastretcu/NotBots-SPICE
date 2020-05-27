@@ -83,6 +83,12 @@ protected:
     string name;
 public:
     Component();
+    
+    void rename(string &new_name)
+    {
+        name = new_name;
+    }
+    
     virtual ~Component() =0;
 }
 
@@ -109,6 +115,7 @@ public:
         resistance = string_to_double(*w);
         delete w;
     }
+    
     ~Resistor();
 }
 
@@ -216,13 +223,36 @@ public:
     ~iSource();
 }
 
-//create constructor for SineV and SineI
+//create constructor for SineV and SineI !!!!!! CHECK TO SEE IF INHERITANCE WORKS
 class SineV: public vSource
 {
 protected:
     double Vamp, freq;
 public:
-    SineV();
+    SineV(stringstream &ss)
+    {
+        string *w = new string;
+        
+        getline (ss, *w, ' ');
+        name = *w;
+        
+        getline (ss, *w, ' ');
+        np = *w;
+        
+        getline (ss, *w, ' ');
+        nm = *w;
+        
+        getline (ss, *w, '(');
+        getline (ss, *w, ' ');
+        V = string_to_double(*w);
+        
+        getline (ss, *w, ' ');
+        Vamp = string_to_double(*w);
+        
+        getline (ss, *w, ')');
+        freq = string_to_double(*w);
+        delete w;
+    }
     ~SineV();
 }
 
@@ -231,8 +261,70 @@ class SineI: public vSource
 protected:
     double Iamp, freq;
 public:
-    SineI();
+    SineI()
+    {
+       string *w = new string;
+        
+        getline (ss, *w, ' ');
+        name = *w;
+        
+        getline (ss, *w, ' ');
+        nin = *w;
+        
+        getline (ss, *w, ' ');
+        nout = *w;
+        
+        getline (ss, *w, '(');
+        getline (ss, *w, ' ');
+        I = string_to_double(*w);
+        
+        getline (ss, *w, ' ');
+        Iamp = string_to_double(*w);
+        
+        getline (ss, *w, ')');
+        freq = string_to_double(*w);
+        delete w;
+    }
     ~SineI();
 }
+
+Component choose_source(string &line, stringstream &ss)
+{
+    stringstream new_ss(line);
+    string w, type;
+    getline (new_ss, type, ' ');
+    getline (new_ss, w, ' ');
+    getline (new_ss, w, ' ');
+    
+    getline (new_ss, w, ' ');
+    if(type[0] == 'V')
+    {
+        if(w[0] == 'S' || w[0] == 's')
+        {
+            SineV new_sineV(ss);
+            return new_sineV;
+        }
+        else
+        {
+            vSource new_vSource(ss);
+            return new_vSource;
+        }
+    }
+    else
+    {
+        if(w[0] == 'S' || w[0] == 's')
+        {
+            SineI new_sineI(ss);
+            return new_sineI;
+        }
+        else
+        {
+            iSource new_iSource(ss);
+            return new_iSource;
+        }
+    }
+}
+
+
 
 #endif

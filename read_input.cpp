@@ -7,12 +7,13 @@
 
 using namespace std;
 
+//creates a specific component object from a line of input
 Component create_component(string &line)
 {
-    stringstream ss(line);
+    stringstream ss(line), check_type(line);
     string word;
     
-    getline(ss, word, ' ');
+    getline(check_type, word, ' ');
     
     switch (word[0])
     {
@@ -26,14 +27,14 @@ Component create_component(string &line)
             Inductor ind(ss);
             return ind;
             
-        //special cases for function as input
         case 'V':
-            break;
+            return choose_source(line, ss);
         case 'I':
-            break;
+            return choose_source(line, ss);
     }
 }
 
+//this function is kinda redundant, can be modified and moved to Nodes.hpp or modified for input directly
 Nodes create_nodes(string &line)
 {
     stringstream ss(line);
