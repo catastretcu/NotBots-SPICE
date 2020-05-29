@@ -91,12 +91,12 @@ public:
              Resistors only, for now
             */
             if(node1 && node2)
-                Conductances[node1-1][node2-1] += c.compute_conductances();
+                Conductances[node1-1][node2-1] += c.compute_conductance();
             
             if(node1)
-                Conductances[node1-1][node1-1] += c.compute_conductances();
+                Conductances[node1-1][node1-1] += c.compute_conductance();
             if(node2)
-                Conductances[node2-1][node2-1] += c.compute_conductances();
+                Conductances[node2-1][node2-1] += c.compute_conductance();
         }
     }
 }
