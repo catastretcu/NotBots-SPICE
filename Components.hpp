@@ -91,7 +91,8 @@ public:
         name = new_name;
     }
     
-    virtual ~Component() =0;
+    //implement this for specific components:
+    virtual double compute_conductance() =0;
 }
 
 class Resistor: public Component
@@ -118,6 +119,10 @@ public:
         delete w;
     }
     
+    double compute_conductance()
+    {
+        return 1.0/resistance;
+    }
     ~Resistor();
 }
 

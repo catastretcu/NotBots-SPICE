@@ -9,7 +9,17 @@
 
 
 
-vector<double> node_voltages(vector<vector<double>> &conductances, vector<double> &node_currents)
+vector<double> node_voltages(Nodes &circuit, Analysis &command);
 {
     //compute node voltages;
+    if(command.type == ".op")
+    {
+        vector<double> voltages;
+        voltages.resize(circuit.Size);
+        //do inverse matrix and multiply with current vector to find voltage vector
+    }
+    if(command.type == ".tran")
+    {
+        //do transient analysis using discrete time
+    }
 }
