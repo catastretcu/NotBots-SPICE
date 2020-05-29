@@ -1,5 +1,6 @@
 #include "Components.hpp"
 #include "Node.hpp"
+#include "Analysis.hpp"
 #include <iostream>
 #include <cstring>
 #include <sstream>
@@ -22,40 +23,22 @@ pair<string, string> read_nodes(string &line)
     return make_pair(first_node, second_node);
 }
 
-//creates a specific component object from a line of input
-Component create_component(string &line)
+//function used for direct input: returns a map of the circuit and the analysis type.
+pair<Nodes, Analysis> read_input(Nodes &circuit, Analysis &command)
 {
-    stringstream ss(line);
-    
-    switch (line[0])
-    {
-        case 'R':
-            Resistor res(ss);
-            return res;
-        case 'C':
-            Capacitor cap(ss);
-            return cap;
-        case 'L':
-            Inductor ind(ss);
-            return ind;
-            
-        case 'V':
-            return choose_source(line, ss);
-        case 'I':
-            return choose_source(line, ss);
-            
-        //add diode and transistor support;
-    }
-}
-
-//function used for direct input
-Nodes map_circuit()
-{
-    Nodes circuit;
     string line;
     
     while(getline(cin, line))
-        circuit.add_branch(read_nodes(line), create_component(line));
+    {
+        if(line[0] != '*' && line[0] != '.')
+            circuit.add_branch(read_nodes(line), create_component(line));
+        else
+        {
+            //save analysis type data
+            if(line[0] == '.' && line != ".end")
+                command = choose_analysis(line);
+        }
+    }
     
-    return circuit;
+    return make_pair(circuit, command);
 }

@@ -39,9 +39,11 @@ double string_to_double(string &s)
                     case 'u':
                         d *= pow(10, -6);
                         break;
+                    /*
                     case 'µ':
                         d *= pow(10, -6);
                         break;
+                     */
                     case 'm':
                         d *= pow(10, -3);
                     case 'c':
@@ -76,7 +78,7 @@ double string_to_double(string &s)
     return d;
 }
 
-//General component obeject
+//General component object
 class Component
 {
 protected:
@@ -288,6 +290,7 @@ public:
     ~SineI();
 }
 
+//chooses source type (for now, between DC and sine)
 Component choose_source(string &line, stringstream &ss)
 {
     stringstream new_ss(line);
@@ -325,6 +328,34 @@ Component choose_source(string &line, stringstream &ss)
     }
 }
 
+//creates a specific component object from a line of input
+Component create_component(string &line)
+{
+    stringstream ss(line);
+    
+    switch (line[0])
+    {
+        case 'R':
+            Resistor res(ss);
+            return res;
+        case 'C':
+            Capacitor cap(ss);
+            return cap;
+        case 'L':
+            Inductor ind(ss);
+            return ind;
+            
+        case 'V':
+            return choose_source(line, ss);
+        case 'I':
+            return choose_source(line, ss);
+
+        //add diode and transistor support;
+        default:
+            cerr << "Unspecified component." << endl;
+            break;
+    }
+}
 
 
 #endif
