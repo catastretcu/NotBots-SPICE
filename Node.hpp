@@ -8,10 +8,10 @@
 #include <map>
 #include <utility>
 #include <cctype>
+#include <Eigen/Dense>
 
 using namespace std;
 
-//can be modified to resemble a matrix by adding components at both a[i][j] and a[j][i] nodes in inverse order
 class Nodes
 {
 private:
@@ -27,6 +27,15 @@ public:
     Nodes()
     {
         Size = 0;
+    }
+    
+    /*
+        Modify all get_ methods to const types.
+    */
+    
+    int get_Size()
+    {
+        return Size;
     }
     
     void Resize()
@@ -66,6 +75,26 @@ public:
         }
     }
     
+    double get_conductance(int &i, int &j)
+    {
+        return Conductances[i][j];
+    }
+    
+    double get_current(int &i)
+    {
+        return Currents[i];
+    }
+    
+    double get_voltage(int &i)
+    {
+        return Voltages[i];
+    }
+    
+    void add_voltage(int &i, double &value)
+    {
+        Voltages[i] = value;
+    }
+    
     void add_branch(const pair<string, string> &p, const Component &c)
     {
         Branch[p].push_back(c);
@@ -77,12 +106,12 @@ public:
         /*
          Current sources only, for now
         */
-        if(c.name[0] == 'I')
+        if(c.get_type() == 'I')
         {
             if(node1)
-                Currents[node1-1] += c.I;
+                Currents[node1-1] += c.get_I();
             if(node2)
-                Currents[node2-1] -= c.I;
+                Currents[node2-1] -= c.get_I();
         }
         else
         {
@@ -98,6 +127,12 @@ public:
             if(node2)
                 Conductances[node2-1][node2-1] += c.compute_conductance();
         }
+    }
+    
+    void print_voltages()
+    {
+        for(int i = 0; i < Size; i++)
+            cout << Voltages[i] << endl;
     }
 }
 

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-//helper function for function map_circuit -> without transistor support
+//helper function for function read_input -> without transistor support
 pair<string, string> read_nodes(string &line)
 {
     stringstream ss(line);
@@ -24,7 +24,7 @@ pair<string, string> read_nodes(string &line)
 }
 
 //function used for direct input: returns a map of the circuit and the analysis type.
-pair<Nodes, Analysis> read_input(Nodes &circuit, Analysis &command)
+void read_input(Nodes &circuit, Analysis &command)
 {
     string line;
     
@@ -39,6 +39,4 @@ pair<Nodes, Analysis> read_input(Nodes &circuit, Analysis &command)
                 command = choose_analysis(line);
         }
     }
-    
-    return make_pair(circuit, command);
 }

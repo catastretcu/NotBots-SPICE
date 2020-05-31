@@ -16,7 +16,22 @@ protected:
     string type;
 public:
     Analysis();
+    const string get_type()
+    {
+        return type;
+    }
     ~Analysis();
+}
+
+//operating point specific class
+class Op: public Analysis
+{
+public:
+    Op(string &line)
+    {
+        type = ".op";
+    }
+    ~Op();
 }
 
 //transient analysis specific class;
@@ -54,9 +69,12 @@ Analysis choose_analysis(string &line)
     getline(ss, atype, ' ');
     switch(atype)
     {
+        case ".op":
+            return Op(line);
+            
         case ".tran":
             return Tran(line);
-            
+        
         //add support for different types of analysis like operating point or AC-sweep
         default:
             cerr << "Unspecified analysis." << endl;

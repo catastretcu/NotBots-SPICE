@@ -86,6 +86,11 @@ protected:
 public:
     Component();
     
+    string get_type()
+    {
+        return name[0];
+    }
+    
     void rename(string &new_name)
     {
         name = new_name;
@@ -227,6 +232,12 @@ public:
         I = string_to_double(*w);
         delete w;
     }
+    
+    double get_I()
+    {
+        return I;
+    }
+    
     ~iSource();
 }
 
