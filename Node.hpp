@@ -1,6 +1,6 @@
 #ifndef node_hpp
 #define node_hpp
-
+/*
 #include "Components.hpp"
 #include <iostream>
 #include <vector>
@@ -8,9 +8,11 @@
 #include <map>
 #include <utility>
 #include <cctype>
+#include <cassert>
 #include <Eigen/Dense>
 
 using namespace std;
+*/
 
 class Nodes
 {
@@ -41,6 +43,7 @@ public:
     void Resize()
     {
         Currents.resize(Size);
+        Voltages.resize(Size);
         Conductances.resize(Size);
         for(int i = 0; i < Conductances.size(); i++)
             Conductances[i].resize(Size);
@@ -95,9 +98,9 @@ public:
         Voltages[i] = value;
     }
     
-    void add_branch(const pair<string, string> &p, const Component &c)
+    void add_branch(pair<string, string> p, Component *c)
     {
-        Branch[p].push_back(c);
+        Branch[p].push_back(*c);
         
         int node1 = node_number(p.first);
         int node2 = node_number(p.second);
@@ -106,26 +109,31 @@ public:
         /*
          Current sources only, for now
         */
-        if(c.get_type() == 'I')
+        if(c->get_type() == 'I')
         {
             if(node1)
-                Currents[node1-1] += c.get_I();
+                Currents[node1-1] += c->get_I();
             if(node2)
-                Currents[node2-1] -= c.get_I();
+                Currents[node2-1] -= c->get_I();
         }
         else
         {
-            //compute impedance
+            //add to conductance matrix
             /*
              Resistors only, for now
             */
+            assert(c->get_type() == 'R');
+            
             if(node1 && node2)
-                Conductances[node1-1][node2-1] += c.compute_conductance();
+            {
+                Conductances[node1-1][node2-1] -= c->compute_conductance();
+                Conductances[node2-1][node1-1] -= c->compute_conductance();
+            }
             
             if(node1)
-                Conductances[node1-1][node1-1] += c.compute_conductance();
+                Conductances[node1-1][node1-1] += c->compute_conductance();
             if(node2)
-                Conductances[node2-1][node2-1] += c.compute_conductance();
+                Conductances[node2-1][node2-1] += c->compute_conductance();
         }
     }
     
@@ -134,6 +142,6 @@ public:
         for(int i = 0; i < Size; i++)
             cout << Voltages[i] << endl;
     }
-}
+};
 
 #endif

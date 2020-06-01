@@ -1,11 +1,12 @@
 #ifndef components_hpp
 #define components_hpp
-
+/*
 #include <iostream>
 #include <cstring>
 #include <sstream>
 #include <cmath>
 #include <cctype>
+*/
 
 using namespace std;
 
@@ -48,9 +49,9 @@ double string_to_double(string &s)
                         d *= pow(10, -3);
                     case 'c':
                         d *= pow(10, -2);
-                        break
+                        break;
                     case 'd':
-                        if(s[i+1] != a)
+                        if(s[i+1] != 'a')
                             d *= pow(10, -1);
                         else
                             d *= pow(10, 1);
@@ -67,7 +68,7 @@ double string_to_double(string &s)
                     case 'G':
                         d*= pow(10, 9);
                         break;
-                    case 'T';
+                    case 'T':
                         d*= pow(10, 12);
                         break;
                 }
@@ -84,9 +85,7 @@ class Component
 protected:
     string name;
 public:
-    Component();
-    
-    string get_type()
+    char get_type()
     {
         return name[0];
     }
@@ -96,9 +95,18 @@ public:
         name = new_name;
     }
     
-    //implement this for specific components:
-    virtual double compute_conductance() =0;
-}
+    /*
+    Implement these for specific components:
+     */
+    virtual double get_I()
+    {
+        return 0;
+    }
+    virtual double compute_conductance()
+    {
+        return 0;
+    }
+};
 
 class Resistor: public Component
 {
@@ -106,7 +114,8 @@ protected:
     string n1, n2;
     double resistance;
 public:
-    Resistor(stringstream &ss);
+    Resistor();
+    Resistor(stringstream &ss)
     {
         string *w = new string;
         
@@ -129,7 +138,7 @@ public:
         return 1.0/resistance;
     }
     ~Resistor();
-}
+};
 
 class Capacitor: public Component
 {
@@ -137,7 +146,8 @@ protected:
     string n1, n2;
     double capacitance;
 public:
-    Capacitor(stringstream &ss);
+    Capacitor();
+    Capacitor(stringstream &ss)
     {
         string *w = new string;
         
@@ -155,7 +165,7 @@ public:
         delete w;
     }
     ~Capacitor();
-}
+};
 
 class Inductor: public Component
 {
@@ -163,6 +173,7 @@ protected:
     string n1, n2;
     double inductance;
 public:
+    Inductor();
     Inductor(stringstream &ss)
     {
         string *w = new string;
@@ -181,7 +192,7 @@ public:
         delete w;
     }
     ~Inductor();
-}
+};
 
 class vSource: public Component
 {
@@ -189,6 +200,7 @@ protected:
     string np, nm;
     double V;
 public:
+    vSource();
     vSource(stringstream &ss)
     {
         string *w = new string;
@@ -207,7 +219,7 @@ public:
         delete w;
     }
     ~vSource();
-}
+};
 
 class iSource: public Component
 {
@@ -215,6 +227,7 @@ protected:
     string nin, nout;
     double I;
 public:
+    iSource();
     iSource(stringstream &ss)
     {
         string *w = new string;
@@ -239,14 +252,17 @@ public:
     }
     
     ~iSource();
-}
+};
 
 //create constructor for SineV and SineI !!!!!! CHECK TO SEE IF INHERITANCE WORKS
-class SineV: public vSource
+class SineV: public Component
 {
 protected:
+    string np, nm;
+    double V;
     double Vamp, freq;
 public:
+    SineV();
     SineV(stringstream &ss)
     {
         string *w = new string;
@@ -272,14 +288,17 @@ public:
         delete w;
     }
     ~SineV();
-}
+};
 
-class SineI: public vSource
+class SineI: public Component
 {
 protected:
+    string nin, nout;
+    double I;
     double Iamp, freq;
 public:
-    SineI()
+    SineI();
+    SineI(stringstream &ss)
     {
        string *w = new string;
         
@@ -304,73 +323,67 @@ public:
         delete w;
     }
     ~SineI();
-}
+};
 
 //chooses source type (for now, between DC and sine)
-Component choose_source(string &line, stringstream &ss)
+Component *choose_source(string &linecs, stringstream &sscs)
 {
-    stringstream new_ss(line);
-    string w, type;
-    getline (new_ss, type, ' ');
-    getline (new_ss, w, ' ');
-    getline (new_ss, w, ' ');
+    stringstream new_ss(linecs);
+    string wcs, typecs;
+    getline (new_ss, typecs, ' ');
+    getline (new_ss, wcs, ' ');
+    getline (new_ss, wcs, ' ');
     
-    getline (new_ss, w, ' ');
-    if(type[0] == 'V')
+    getline (new_ss, wcs, ' ');
+    if(typecs[0] == 'V')
     {
-        if(w[0] == 'S' || w[0] == 's')
+        if(wcs[0] == 'S' || wcs[0] == 's')
         {
-            SineV new_sineV(ss);
-            return new_sineV;
+            return new SineV(sscs);
         }
         else
         {
-            vSource new_vSource(ss);
-            return new_vSource;
+            return new vSource(sscs);
         }
     }
     else
     {
-        if(w[0] == 'S' || w[0] == 's')
+        if(wcs[0] == 'S' || wcs[0] == 's')
         {
-            SineI new_sineI(ss);
-            return new_sineI;
+            return new SineI(sscs);
         }
         else
         {
-            iSource new_iSource(ss);
-            return new_iSource;
+            return new iSource(sscs);
         }
     }
 }
 
 //creates a specific component object from a line of input
-Component create_component(string &line)
+Component *create_component(string &linecc)
 {
-    stringstream ss(line);
+    stringstream sscc(linecc);
     
-    switch (line[0])
+    switch (linecc[0])
     {
         case 'R':
-            Resistor res(ss);
-            return res;
+            return new Resistor(sscc);
         case 'C':
-            Capacitor cap(ss);
-            return cap;
+            return new Capacitor(sscc);
         case 'L':
-            Inductor ind(ss);
-            return ind;
+            return new Inductor(sscc);
             
         case 'V':
-            return choose_source(line, ss);
+            return choose_source(linecc, sscc);
         case 'I':
-            return choose_source(line, ss);
+            return choose_source(linecc, sscc);
 
         //add diode and transistor support;
         default:
             cerr << "Unspecified component." << endl;
             break;
     }
+    return nullptr;
 }
 
 

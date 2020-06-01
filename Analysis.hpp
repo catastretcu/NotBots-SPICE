@@ -1,7 +1,7 @@
 #ifndef analysis_hpp
 #define analysis_hpp
-
-#include "Components.hpp"
+/*
+#include "Node.hpp"
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -9,30 +9,32 @@
 #include <utility>
 #include <sstream>
 
+using namespace std;
+*/
+
 //general Analysis class
 class Analysis
 {
-protected:
-    string type;
+//protected:
 public:
-    Analysis();
+    string type;
+
     const string get_type()
     {
         return type;
     }
-    ~Analysis();
-}
+};
 
 //operating point specific class
 class Op: public Analysis
 {
 public:
-    Op(string &line)
+    Op()
     {
         type = ".op";
     }
     ~Op();
-}
+};
 
 //transient analysis specific class;
 class Tran: public Analysis
@@ -40,6 +42,7 @@ class Tran: public Analysis
 protected:
     double interval, time;
 public:
+    Tran();
     Tran(string &line)
     {
         type = ".tran";
@@ -59,26 +62,23 @@ public:
         
     }
     ~Tran();
-}
+};
 
-Analysis choose_analysis(string &line)
+Analysis *choose_analysis(string &line)
 {
     stringstream ss(line);
     string atype;
     
     getline(ss, atype, ' ');
-    switch(atype)
-    {
-        case ".op":
-            return Op(line);
+    
+    if(atype == ".op")
+        return new Op();
             
-        case ".tran":
-            return Tran(line);
+    if(atype == ".tran")
+        return new Tran(line);
         
-        //add support for different types of analysis like operating point or AC-sweep
-        default:
-            cerr << "Unspecified analysis." << endl;
-            break;
-    }
+    //add support for different types of analysis like operating point or AC-sweep
+    cerr << "Unspecified analysis." << endl;
+    return nullptr;
 }
 #endif
