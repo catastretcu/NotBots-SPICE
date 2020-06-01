@@ -1,12 +1,5 @@
 #ifndef components_hpp
 #define components_hpp
-/*
-#include <iostream>
-#include <cstring>
-#include <sstream>
-#include <cmath>
-#include <cctype>
-*/
 
 using namespace std;
 

@@ -1,17 +1,7 @@
 #ifndef node_hpp
 #define node_hpp
 /*
-#include "Components.hpp"
-#include <iostream>
-#include <vector>
-#include <cstring>
-#include <map>
-#include <utility>
-#include <cctype>
-#include <cassert>
-#include <Eigen/Dense>
-
-using namespace std;
+Convert to Eigen instead of normal vectors
 */
 
 class Nodes
@@ -32,7 +22,7 @@ public:
     }
     
     /*
-        Modify all get_ methods to const types.
+        Modify all get_ methods to const types if possible.
     */
     
     int get_Size()
@@ -51,31 +41,35 @@ public:
     
     int node_number(string &s)
     {
-        if(s[0] == 'n' || s[0] == 'N')
+        if(s != "0")
         {
-            s.erase(s.begin());
-            if(stoi(s) > Size)
+            if(s[0] == 'n' || s[0] == 'N')
             {
-                Size = stoi(s);
-                Resize();
+                s.erase(s.begin());
+                if(stoi(s) > Size)
+                {
+                    Size = stoi(s);
+                    Resize();
+                }
+                return stoi(s);
             }
-            return stoi(s);
-        }
-        else
-        {
-            //check label
-            //if new, add new label with number Size+1
-            if(Labels[s])
-                return Labels[s];
             else
             {
-                Size++;
-                Labels[s] = Size;
-                Resize();
-                return Size;
-            }
+                //check label
+                //if new, add new label with number Size+1
+                if(Labels[s])
+                    return Labels[s];
+                else
+                {
+                    Size++;
+                    Labels[s] = Size;
+                    Resize();
+                    return Size;
+                }
             
+            }
         }
+        return 0;
     }
     
     double get_conductance(int &i, int &j)
@@ -140,7 +134,26 @@ public:
     void print_voltages()
     {
         for(int i = 0; i < Size; i++)
-            cout << Voltages[i] << endl;
+            cout << setprecision(10) << Voltages[i] << endl;
+    
+    
+    }
+    
+    void print_currents()
+    {
+        for(int i = 0; i < Currents.size(); i++)
+            cout << Currents[i] << endl;
+    }
+    
+    void print_conductances()
+    {
+        for(int i = 0; i < Conductances.size(); i++)
+        {
+            for(int j = 0; j < Conductances.size(); j++)
+                cout << Conductances[i][j] << " ";
+            
+            cout << endl;
+        }
     }
 };
 

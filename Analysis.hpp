@@ -1,16 +1,5 @@
 #ifndef analysis_hpp
 #define analysis_hpp
-/*
-#include "Node.hpp"
-#include <iostream>
-#include <vector>
-#include <cstring>
-#include <map>
-#include <utility>
-#include <sstream>
-
-using namespace std;
-*/
 
 //general Analysis class
 class Analysis

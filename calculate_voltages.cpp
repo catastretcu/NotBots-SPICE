@@ -1,4 +1,4 @@
-//redundant for now
+//redundant for now: only testing with simulate.cpp
 
 
 /*

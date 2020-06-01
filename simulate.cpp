@@ -7,6 +7,7 @@
 #include <cctype>
 #include <map>
 #include <cassert>
+#include <iomanip>
 #include <Eigen/Dense>
 #include "Components.hpp"
 #include "Node.hpp"
@@ -91,6 +92,14 @@ int main()
         node_voltages(circuit);
         //output voltages;
         circuit->print_voltages();
+        
+        cout << endl;
+        
+        circuit->print_conductances();
+        
+        cout << endl;
+        
+        circuit->print_currents();
     }
     
     if(command->get_type() == ".tran")
