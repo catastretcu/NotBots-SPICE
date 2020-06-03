@@ -91,6 +91,10 @@ public:
     /*
     Implement these for specific components:
      */
+    virtual double get_V()
+    {
+        return 0;
+    }
     virtual double get_I()
     {
         return 0;
@@ -210,6 +214,10 @@ public:
         getline (ss, *w, ' ');
         V = string_to_double(*w);
         delete w;
+    }
+    double get_V()
+    {
+        return V;
     }
     ~vSource();
 };

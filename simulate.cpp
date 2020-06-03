@@ -8,6 +8,7 @@
 #include <map>
 #include <cassert>
 #include <iomanip>
+#include <algorithm>
 #include <Eigen/Dense>
 #include "Components.hpp"
 #include "Node.hpp"
