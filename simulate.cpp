@@ -57,30 +57,6 @@ Analysis *read_input(Nodes *circuit, Analysis *command)
     return command;
 }
 
-void node_voltages(Nodes *circuit)
-{
-    /*
-    do inverse matrix and multiply with current vector to find voltage vector
-    (use eigen library)
-    */
-        
-    MatrixXd cm(circuit->get_Size(), circuit->get_Size());
-    for (int i = 0; i < circuit->get_Size(); i++)
-        for(int j = 0; j < circuit->get_Size(); j++)
-            cm(i, j) = circuit->get_conductance(i, j);
-        
-    VectorXd vi(circuit->get_Size());
-        for (int i = 0; i < circuit->get_Size(); i++)
-            vi(i) = circuit->get_current(i);
-        
-    VectorXd vv(circuit->get_Size());
-    //choose different types of solutions to Ax = b from Eigen
-    vv = cm.colPivHouseholderQr().solve(vi);
-        
-    for(int i = 0; i < circuit->get_Size(); i++)
-        circuit->add_voltage(i, vv(i));
-}
-
 int main()
 {
     Nodes *circuit = new Nodes();
@@ -90,7 +66,7 @@ int main()
     
     if(command->get_type() == ".op")
     {
-        node_voltages(circuit);
+        circuit->compute_voltages();
         //output voltages;
         circuit->print_voltages();
         

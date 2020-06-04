@@ -103,6 +103,14 @@ public:
     {
         return 0;
     }
+    virtual string get_np()
+    {
+        return {};
+    }
+    virtual string get_nm()
+    {
+        return {};
+    }
 };
 
 class Resistor: public Component
@@ -219,6 +227,14 @@ public:
     {
         return V;
     }
+    string get_np()
+    {
+        return np;
+    }
+    string get_nm()
+    {
+        return nm;
+    }
     ~vSource();
 };
 
@@ -287,6 +303,14 @@ public:
         getline (ss, *w, ')');
         freq = string_to_double(*w);
         delete w;
+    }
+    string get_np()
+    {
+        return np;
+    }
+    string get_nm()
+    {
+        return nm;
     }
     ~SineV();
 };
