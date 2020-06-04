@@ -169,7 +169,10 @@ public:
         for(int i = 0; i < Conductances.size(); i++)
         {
             Conductances[i].resize(Size);
-            okC[i].resize(Size);
+            if(!okC[i].empty())
+                okC[i].resize(Size, okC[i][0]);
+            else
+                okC[i].resize(Size);
         }
     }
     
