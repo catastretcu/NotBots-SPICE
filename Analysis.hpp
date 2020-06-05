@@ -12,6 +12,16 @@ public:
     {
         return type;
     }
+    
+    virtual const double get_interval()
+    {
+        return 0;
+    }
+    
+    virtual const double get_duration()
+    {
+        return 0;
+    }
 };
 
 //operating point specific class
@@ -29,7 +39,7 @@ public:
 class Tran: public Analysis
 {
 protected:
-    double interval, time;
+    double interval, duration;
 public:
     Tran();
     Tran(string &line)
@@ -43,13 +53,30 @@ public:
         getline(ss, atype, ' ');
         
         getline(ss, atype, ' ');
+        
+        duration = string_to_double(atype);
+        
+        getline(ss, atype, ' ');
+        
+        getline(ss, atype, ' ');
         interval = string_to_double(atype);
         
-        getline(ss, atype, ' ');
+        if(interval > duration)
+            cerr << "Timestep value larger than stop-time.";
         
-        getline(ss, atype, ' ');
-        
+        assert(interval <= duration);
     }
+    
+    const double get_interval()
+    {
+        return interval;
+    }
+    
+    const double get_duration()
+    {
+        return duration;
+    }
+    
     ~Tran();
 };
 

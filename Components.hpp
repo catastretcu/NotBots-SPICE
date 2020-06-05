@@ -40,6 +40,7 @@ double string_to_double(string &s)
                      */
                     case 'm':
                         d *= pow(10, -3);
+                        break;
                     case 'c':
                         d *= pow(10, -2);
                         break;
@@ -78,6 +79,11 @@ class Component
 protected:
     string name;
 public:
+    const string get_name()
+    {
+        return name;
+    }
+    
     char get_type()
     {
         return name[0];
@@ -95,19 +101,37 @@ public:
     {
         return 0;
     }
+    virtual double get_V(double &time)
+    {
+        return 0;
+    }
     virtual double get_I()
     {
         return 0;
     }
+    virtual double get_I(double &time)
+    {
+        return 0;
+    }
+    
     virtual double compute_conductance()
     {
         return 0;
     }
+    
     virtual string get_np()
     {
         return {};
     }
     virtual string get_nm()
+    {
+        return {};
+    }
+    virtual string get_nin()
+    {
+        return {};
+    }
+    virtual string get_nout()
     {
         return {};
     }
@@ -227,6 +251,10 @@ public:
     {
         return V;
     }
+    double get_V(double &time)
+    {
+        return V;
+    }
     string get_np()
     {
         return np;
@@ -267,7 +295,18 @@ public:
     {
         return I;
     }
-    
+    double get_I(double &time)
+    {
+        return I;
+    }
+    string get_nin()
+    {
+        return nin;
+    }
+    string get_nout()
+    {
+        return nout;
+    }
     ~iSource();
 };
 
@@ -277,6 +316,7 @@ class SineV: public Component
 protected:
     string np, nm;
     double V;
+    double Voff;
     double Vamp, freq;
 public:
     SineV();
@@ -295,7 +335,7 @@ public:
         
         getline (ss, *w, '(');
         getline (ss, *w, ' ');
-        V = string_to_double(*w);
+        Voff = string_to_double(*w);
         
         getline (ss, *w, ' ');
         Vamp = string_to_double(*w);
@@ -303,6 +343,10 @@ public:
         getline (ss, *w, ')');
         freq = string_to_double(*w);
         delete w;
+    }
+    double get_V(double &time)
+    {
+        return Voff + Vamp*sin(2.0*M_PI*freq*time);
     }
     string get_np()
     {
@@ -320,6 +364,7 @@ class SineI: public Component
 protected:
     string nin, nout;
     double I;
+    double Ioff;
     double Iamp, freq;
 public:
     SineI();
@@ -338,7 +383,7 @@ public:
         
         getline (ss, *w, '(');
         getline (ss, *w, ' ');
-        I = string_to_double(*w);
+        Ioff = string_to_double(*w);
         
         getline (ss, *w, ' ');
         Iamp = string_to_double(*w);
@@ -346,6 +391,18 @@ public:
         getline (ss, *w, ')');
         freq = string_to_double(*w);
         delete w;
+    }
+    double get_I(double &time)
+    {
+        return Ioff + Iamp*sin(2.0*M_PI*freq*time);
+    }
+    string get_nin()
+    {
+        return nin;
+    }
+    string get_nout()
+    {
+        return nout;
     }
     ~SineI();
 };

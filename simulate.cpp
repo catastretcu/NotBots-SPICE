@@ -1,3 +1,6 @@
+#include <fstream>
+std::ofstream fout("data_out.txt");
+
 #include <iostream>
 #include <cstring>
 #include <sstream>
@@ -66,6 +69,7 @@ int main()
     
     if(command->get_type() == ".op")
     {
+        circuit->compute_size();
         circuit->compute_voltages();
         //output voltages;
         circuit->print_voltages();
@@ -82,6 +86,20 @@ int main()
     if(command->get_type() == ".tran")
     {
         //do transient analysis using discrete time
+        double tinterval = command->get_interval();
+        double tduration = command->get_duration();
+        double time = 0;
+    
+        circuit->compute_size();
+        
+        while(time <= tduration)
+        {
+            circuit->compute_voltages(time);
+            
+            time += tinterval;
+        }
+        
+        circuit->print_voltages();
     }
     
     delete circuit;
