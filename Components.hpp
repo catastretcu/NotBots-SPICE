@@ -56,6 +56,9 @@ double string_to_double(string &s)
                     case 'k':
                         d *= pow(10, 3);
                         break;
+                    case 'K':
+                        d *= pow(10, 3);
+                        break;
                     case 'M':
                         d*= pow(10, 6);
                         break;
@@ -113,12 +116,27 @@ public:
     {
         return 0;
     }
+    virtual double get_C()
+    {
+        return 0;
+    }
+    virtual double get_L()
+    {
+        return 0;
+    }
     
     virtual double compute_conductance()
     {
         return 0;
     }
-    
+    virtual string get_n1()
+    {
+        return {};
+    }
+    virtual string get_n2()
+    {
+        return {};
+    }
     virtual string get_np()
     {
         return {};
@@ -193,6 +211,18 @@ public:
         capacitance = string_to_double(*w);
         delete w;
     }
+    double get_C()
+    {
+        return capacitance;
+    }
+    string get_n1()
+    {
+        return n1;
+    }
+    string get_n2()
+    {
+        return n2;
+    }
     ~Capacitor();
 };
 
@@ -219,6 +249,18 @@ public:
         getline (ss, *w, ' ');
         inductance = string_to_double(*w);
         delete w;
+    }
+    double get_L()
+    {
+        return inductance;
+    }
+    string get_n1()
+    {
+        return n1;
+    }
+    string get_n2()
+    {
+        return n2;
     }
     ~Inductor();
 };
