@@ -124,6 +124,9 @@ public:
     {
         return 0;
     }
+    virtual void update_I(double &i)
+    {
+    }
     
     virtual double compute_conductance()
     {
@@ -231,6 +234,7 @@ class Inductor: public Component
 protected:
     string n1, n2;
     double inductance;
+    double I;
 public:
     Inductor();
     Inductor(stringstream &ss)
@@ -249,10 +253,20 @@ public:
         getline (ss, *w, ' ');
         inductance = string_to_double(*w);
         delete w;
+        
+        I = 0;
     }
     double get_L()
     {
         return inductance;
+    }
+    double get_I()
+    {
+        return I;
+    }
+    void update_I(double &i)
+    {
+        I += i;
     }
     string get_n1()
     {

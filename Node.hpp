@@ -102,7 +102,7 @@ private:
     }
     
    //helper function for add_I for active components
-    void active_I()
+    void active_I(double &time)
     {
         //capacitors only
         for(int i = 0; i < current_sources.size(); i++)
@@ -142,6 +142,37 @@ private:
                 if(node2)
                     Currents(node2-1) += c->get_C()*dV/dt;
             }
+            else
+                if(c->get_type() == 'L' && voltage_history.size()>0)
+                {
+                    //clean this up if it works
+                    int node1 = node_number(c->get_n1());
+                    int node2 = node_number(c->get_n2());
+                
+                    Eigen::VectorXd v1 = voltage_history[voltage_history.size()-1];
+                          
+                    double V11 = 0, V21 = 0;
+                          
+                    if(node1)
+                        V11 = v1(node1-1);
+                    if(node2)
+                        V21 = v1(node2-1);
+                  
+                    double t1 = time_history[time_history.size()-2];
+                    double t2 = time_history[time_history.size()-1];
+                  
+                    double V1 = (V11 - V21);
+                    double dt = t2 - t1;
+                    double di = V1*dt/c->get_L();
+                    
+                    if(node1)
+                        Currents(node1-1) -= di + c->get_I();
+                                   
+                    if(node2)
+                        Currents(node2-1) += di + c->get_I();
+                    
+                    c->update_I(di);
+                }
         }
     }
     
@@ -177,8 +208,11 @@ private:
                 }
             }
         }
+        
     }
     
+    /*
+    //doesn't work properly
     void active_V()
     {
         for(int i = 0; i < voltage_sources.size(); i++)
@@ -211,10 +245,11 @@ private:
                 double t1 = time_history[time_history.size()-1];
                 double t2 = time_history[time_history.size()-2];
                 
-                double di = (i11 - i21) - (i12 - i22);
+                double di = (i11 + i21) - (i12 + i22);
                 double dt = t1 - t2;
                 
-                double voltage = c->get_L()*di/dt;
+                double voltage = -c->get_L()*di/dt;
+                
             
                 if(node1 && node2)
                 {
@@ -246,6 +281,7 @@ private:
             }
         }
     }
+    */
     
     void add_V(double &time)
     {
@@ -288,6 +324,38 @@ private:
                     }
                 }
             }
+            /*
+            if(c->get_type() == 'L')
+            {
+                int node1 = node_number(c->get_n1());
+                int node2 = node_number(c->get_n2());
+                
+                int id = voltage_sources[i].second;
+                
+                if(node1 && node2)
+                {
+                        Conductances(id-1, node1-1) = 1;
+                        Conductances(node1-1, id-1) = 1;
+                    
+                        Conductances(id-1, node2-1) = -1;
+                        Conductances(node2-1, id-1) = -1;
+                }
+                else
+                {
+                        if(node1)
+                        {
+                            Conductances(id-1, node1-1) = 1;
+                            Conductances(node1-1, id-1) = 1;
+                        }
+                        else
+                        {
+                            Conductances(id-1, node2-1) = 1;
+                            Conductances(node2-1, id-1) = 1;
+                        }
+                }
+            }
+            */
+            
         }
     }
     
@@ -334,7 +402,12 @@ public:
         int node1 = node_number(p.first);
         int node2 = node_number(p.second);
         
-        if(c->get_type() == 'I' || c->get_type() == 'C')
+        /*
+        if(c->get_type() == 'L')
+            current_sources.push_back(c);
+         */
+        
+        if(c->get_type() == 'I' || c->get_type() == 'C' || c->get_type() == 'L')
             current_sources.push_back(c);
         else
         {
@@ -343,7 +416,7 @@ public:
             else
             {
                 //still needs testing for voltage sources in series
-                assert(c->get_type() == 'V' || c->get_type() == 'L');
+                assert(c->get_type() == 'V');
                 nSources++;
                 voltage_sources.push_back(make_pair(c, nSources));
             }
@@ -373,6 +446,7 @@ public:
         voltage_history.push_back(Voltages);
     }
     
+    /*
     void get_fullCurrents(Eigen::VectorXd &fc)
     {
         for(int i = 0; i < voltage_sources.size(); i++)
@@ -397,7 +471,7 @@ public:
             if(node2)
                 fc(node2-1) -= Voltages(Size-nSources+i);
         }
-    }
+    }*/
     
     void compute_voltages(double &time)
     {
@@ -410,13 +484,14 @@ public:
         Voltages = Conductances.colPivHouseholderQr().solve(Currents);
         
         op_voltage_history.push_back(Voltages);
-        
+       /*
         Eigen::VectorXd fullCurrents = Currents;
         get_fullCurrents(fullCurrents);
-        op_current_history.push_back(fullCurrents);
+        op_current_history.push_back(Currents);
+        */
         
-        active_I();
-        active_V();
+        active_I(time);
+        //active_V();
         
         Voltages = Conductances.colPivHouseholderQr().solve(Currents);
         
