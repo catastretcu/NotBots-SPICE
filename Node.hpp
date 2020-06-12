@@ -206,6 +206,49 @@ private:
                     }
                 }
             }
+            if(c->get_type() == 'L')
+            {
+                int node1 = node_number(c->get_n1());
+                int node2 = node_number(c->get_n2());
+                
+                int id = voltage_sources[i].second;
+                double lv = 0;
+                
+                if(voltage_history.size() > 0)
+                {
+                    Eigen::VectorXd v1 = voltage_history[voltage_history.size()-1];
+                    lv = -v1(id-1)*c->get_L()/dt;
+                    Conductances(id-1, id-1) = -c->get_L()/dt;
+                }
+                
+                if(node1 && node2)
+                {
+                    Conductances(id-1, node1-1) = 1;
+                    Conductances(node1-1, id-1) = 1;
+                    
+                    Conductances(id-1, node2-1) = -1;
+                    Conductances(node2-1, id-1) = -1;
+                    
+                    Currents(id-1) = lv;
+                }
+                else
+                {
+                    if(node1)
+                    {
+                        Conductances(id-1, node1-1) = 1;
+                        Conductances(node1-1, id-1) = 1;
+                        
+                        Currents(id-1) = lv;
+                    }
+                    else
+                    {
+                        Conductances(id-1, node2-1) = 1;
+                        Conductances(node2-1, id-1) = 1;
+                        
+                        Currents(id-1) = -lv;
+                    }
+                }
+            }
         }
     }
     
@@ -258,7 +301,7 @@ public:
         if(c->get_type() == 'R')
             add_conductance(node1, node2, c);
         
-        if(c->get_type() == 'V')
+        if(c->get_type() == 'V' || c->get_type() == 'L')
         {
             nSources++;
             voltage_sources.push_back(make_pair(c, nSources));
