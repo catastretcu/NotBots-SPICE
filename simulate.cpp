@@ -91,6 +91,7 @@ int main()
         double time = 0;
     
         circuit->compute_size();
+        circuit->set_dt(tinterval);
         
         while(time <= tduration)
         {
