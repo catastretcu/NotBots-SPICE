@@ -1,10 +1,14 @@
 #ifndef analysis_hpp
 #define analysis_hpp
 
+//  Created by Mihai-Catalin Stretcu and Youngmin Song
+//  Department of Electrical and Electronic Engineering, Imperial College London
+//  June 2020
+
+
 //general Analysis class
 class Analysis
 {
-//protected:
 public:
     string type;
 
@@ -80,6 +84,7 @@ public:
     ~Tran();
 };
 
+//Creates a new instance of an analysis type
 Analysis *choose_analysis(string &line)
 {
     stringstream ss(line);

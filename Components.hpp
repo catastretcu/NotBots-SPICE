@@ -1,8 +1,14 @@
 #ifndef components_hpp
 #define components_hpp
 
+//  Created by Mihai-Catalin Stretcu and Youngmin Song
+//  Department of Electrical and Electronic Engineering, Imperial College London
+//  June 2020
+
+
 using namespace std;
 
+//Converts a string to a double, keeping in mind the possible suffix
 double string_to_double(string &s)
 {
     double d;
@@ -34,6 +40,7 @@ double string_to_double(string &s)
                         d *= pow(10, -6);
                         break;
                     /*
+                    //Ready to support unicode.
                     case 'µ':
                         d *= pow(10, -6);
                         break;
@@ -98,7 +105,7 @@ public:
     }
     
     /*
-    Implement these for specific components:
+    Implemented these for specific components.
      */
     virtual double get_V()
     {
@@ -565,7 +572,7 @@ Component *choose_source(string &linecs, stringstream &sscs)
     }
 }
 
-//creates a specific component object from a line of input
+//Creates a specific component object from a line of input
 Component *create_component(string &linecc)
 {
     stringstream sscc(linecc);

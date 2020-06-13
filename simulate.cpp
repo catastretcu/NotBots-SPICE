@@ -1,3 +1,7 @@
+//  Created by Mihai-Catalin Stretcu and Youngmin Song
+//  Department of Electrical and Electronic Engineering, Imperial College London
+//  June 2020
+
 #include <fstream>
 std::ofstream fout("data_out.txt");
 
@@ -20,12 +24,7 @@ std::ofstream fout("data_out.txt");
 using namespace std;
 using namespace Eigen;
 
-/*
-pair<string, string> read_nodes(string &line);
-void read_input(Nodes *circuit, Analysis *command);
-void node_voltages(Nodes *circuit);
-*/
-
+//Helper function for read_input
 pair<string, string> read_nodes(string &linern)
 {
     stringstream ssrn(linern);
@@ -39,7 +38,7 @@ pair<string, string> read_nodes(string &linern)
     return make_pair(first_node, second_node);
 }
 
-//function used for direct input: returns a map of the circuit and the analysis type.
+//Function used for direct input: returns a map of the circuit and the analysis type.
 Analysis *read_input(Nodes *circuit, Analysis *command)
 {
     string lineri;
@@ -50,8 +49,7 @@ Analysis *read_input(Nodes *circuit, Analysis *command)
             circuit->add_branch(read_nodes(lineri), create_component(lineri));
         else
         {
-            //save analysis type data
- 
+            //Saves analysis type data
             if(lineri[0] == '.' && lineri != ".end")
                 command = choose_analysis(lineri);
         }
@@ -60,6 +58,7 @@ Analysis *read_input(Nodes *circuit, Analysis *command)
     return command;
 }
 
+//Reads input, creates circuit, saves analysis type and parameters and simulates according to input specs.
 int main()
 {
     Nodes *circuit = new Nodes();
@@ -73,13 +72,14 @@ int main()
         
         circuit->compute_size();
         circuit->compute_voltages(time);
-        //output voltages;
+        
+        //Outputs voltages
         circuit->print_voltages();
     }
     
     if(command->get_type() == ".tran")
     {
-        //do transient analysis using discrete time
+        //Does transient analysis using discrete time
         double tinterval = command->get_interval();
         double tduration = command->get_duration();
         double time = 0;

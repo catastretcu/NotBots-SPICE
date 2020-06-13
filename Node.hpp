@@ -1,14 +1,23 @@
 #ifndef node_hpp
 #define node_hpp
-/*
-Converted to Eigen instead of normal vectors and using MNA
-*/
 
+//  Created by Mihai-Catalin Stretcu and Youngmin Song
+//  Department of Electrical and Electronic Engineering, Imperial College London
+//  June 2020
+
+
+/*
+ Nodes is a class that can hold all necessary information about a circuit entity
+ */
 class Nodes
 {
 private:
+    //Holds all components between a set of nodes
     map<pair<string, string>, vector<Component>> Branch;
+    
+    //Holds voltage sources and their respective id
     vector<pair<Component*, int>> voltage_sources;
+    
     vector<Component*> current_sources;
     vector<Component*> non_linear;
     vector<Eigen::VectorXd> voltage_history;
@@ -16,20 +25,35 @@ private:
     Eigen::MatrixXd Conductances;
     Eigen::VectorXd Currents;
     Eigen::VectorXd Voltages;
+    
+    //Holds the index of arbitrary labels
     map<string, int> Labels;
+    
+    //Holds labels assosicated with an int value for printing voltage labels
     map<int, string> intLabels;
+    
     int Size;
     int nSources;
     double dt;
+    
+    //Indicates presence of non_linear components in the circuit and is used to check the need for newton_iterate()
     bool is_non_linear;
 
+    //Resizes Conductances, Voltages and Currents according to Size
     void Resize()
     {
+        /*
+         Using conservativeResizeLike() to conserve intial values on their initial position
+         */
         Currents.conservativeResizeLike(Eigen::VectorXd::Zero(Size));
         Voltages.conservativeResizeLike(Eigen::VectorXd::Zero(Size));
         Conductances.conservativeResizeLike(Eigen::MatrixXd::Zero(Size, Size));
     }
     
+    /*
+     Returns an int node number according to a string.
+     Function enables the simulator to use arbitrary labels such as 'V_in', 'V_out'
+     */
     int node_number(string s)
     {
         assert (!s.empty());
@@ -51,8 +75,10 @@ private:
             }
             else
             {
-                //check label
-                //if new, add new label with number Size+1
+                /*
+                 check label
+                 if new, add new label with number Size+1
+                */
                 if(Labels[s])
                     return Labels[s];
                 else
@@ -69,6 +95,7 @@ private:
         return 0;
     }
     
+    //Adds a conductance to matrix 'Conductances' (initial guess for diodes)
     void add_conductance(int &node1, int &node2, Component *c)
     {
         if(c->get_type() == 'R' || c->get_type() == 'D')
@@ -105,6 +132,7 @@ private:
         }
     }
     
+    //Adds a current to vector 'Currents' at time-step &time
     void add_I(double &time)
     {
         for(int i = 0; i < current_sources.size(); i++)
@@ -193,6 +221,7 @@ private:
         }
     }
     
+    //Adds a voltage source in the circuit; modifies both matrix 'Conductances' and vector 'Currents'
     void add_V(double &time)
     {
         for(int i = 0; i < voltage_sources.size(); i++)
@@ -324,9 +353,9 @@ private:
         }
     }
     
+    //iterates Newton-Raphson method until reaching a good approximation
     void newton_iterate()
     {
-        //new implementation
         bool ok = 1;
         
         while (ok)
@@ -380,10 +409,6 @@ public:
         dt = 0;
         is_non_linear = 0;
     }
-    
-    /*
-        Modify all get_ methods to const types if possible.
-    */
     
     int get_Size()
     {
@@ -447,18 +472,7 @@ public:
         Resize();
     }
     
-    //can be removed, only used for .op testing
-    void compute_voltages()
-    {
-        double time = 0;
-        Currents = Eigen::VectorXd::Zero(Size);
-        add_I(time);
-        add_V(time);
-        Voltages = Conductances.colPivHouseholderQr().solve(Currents);
-        
-        voltage_history.push_back(Voltages);
-    }
-
+    //Saves time-step value and initialises 'Conductances' to treat capacitors as open-circuit
     void set_dt(double &t)
     {
         dt = t;
@@ -488,6 +502,7 @@ public:
         }
     }
     
+    //Calculates voltages at a discrete point in time. Makes use of Ax = b solver implementation from Eigen.
     void compute_voltages(double &time)
     {
         time_history.push_back(time);
@@ -504,6 +519,7 @@ public:
         voltage_history.push_back(Voltages);
     }
     
+    //Prints output to file data_out.txt
     void print_voltages()
     {
         fout << "time" << "\t";
@@ -532,14 +548,14 @@ public:
     
     void print_currents()
     {
-        //using to test
+        //Used to test
         for(int i = 0; i < Size; i++)
             cout << Currents(i) << endl;
     }
     
     void print_conductances()
     {
-        //using to test
+        //Used to test
         for(int i = 0; i < Size; i++)
         {
             for(int j = 0; j < Size; j++)
