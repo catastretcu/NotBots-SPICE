@@ -69,18 +69,12 @@ int main()
     
     if(command->get_type() == ".op")
     {
+        double time = 0;
+        
         circuit->compute_size();
-        circuit->compute_voltages();
+        circuit->compute_voltages(time);
         //output voltages;
         circuit->print_voltages();
-        
-        cout << endl;
-        
-        circuit->print_conductances();
-        
-        cout << endl;
-        
-        circuit->print_currents();
     }
     
     if(command->get_type() == ".tran")

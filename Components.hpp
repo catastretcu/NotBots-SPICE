@@ -162,6 +162,8 @@ public:
     {
         return {};
     }
+    virtual void d_iterate(double &vd)
+    {}
 };
 
 class Resistor: public Component
@@ -478,6 +480,57 @@ public:
     ~SineI();
 };
 
+class Diode: public Component
+{
+protected:
+    string n1, n2;
+    double I0;
+    double G0;
+public:
+    Diode();
+    Diode(stringstream &ss)
+    {
+        string *w = new string;
+        
+        getline (ss, *w, ' ');
+        name = *w;
+        
+        getline (ss, *w, ' ');
+        n1 = *w;
+        
+        getline (ss, *w, ' ');
+        n2 = *w;
+        
+        getline (ss, *w, ' ');
+        
+        I0 = 0.39055;
+        G0 = 0.5785;
+        delete w;
+    }
+    double get_I()
+    {
+        return I0;
+    }
+    double compute_conductance()
+    {
+        return G0;
+    }
+    void d_iterate(double &vd)
+    {
+        G0 = 1/0.025*pow(10, -14)*(exp(vd/0.025)-1);
+        I0 = G0*vd - pow(10, -14)*(exp(vd/0.025)-1);
+    }
+    string get_n1()
+    {
+        return n1;
+    }
+    string get_n2()
+    {
+        return n2;
+    }
+    ~Diode();
+};
+
 //chooses source type (for now, between DC and sine)
 Component *choose_source(string &linecs, stringstream &sscs)
 {
@@ -531,7 +584,9 @@ Component *create_component(string &linecc)
         case 'I':
             return choose_source(linecc, sscc);
 
-        //add diode and transistor support;
+        //additional diode support
+        case 'D':
+            return new Diode(sscc);
         default:
             cerr << "Unspecified component." << endl;
             break;

@@ -8,12 +8,10 @@ class Nodes
 {
 private:
     map<pair<string, string>, vector<Component>> Branch;
-    vector<Component*> all_components;
     vector<pair<Component*, int>> voltage_sources;
     vector<Component*> current_sources;
+    vector<Component*> non_linear;
     vector<Eigen::VectorXd> voltage_history;
-    vector<Eigen::VectorXd> op_voltage_history;
-    vector<Eigen::VectorXd> op_current_history;
     vector<double> time_history;
     Eigen::MatrixXd Conductances;
     Eigen::VectorXd Currents;
@@ -23,6 +21,7 @@ private:
     int Size;
     int nSources;
     double dt;
+    bool is_non_linear;
 
     void Resize()
     {
@@ -72,7 +71,7 @@ private:
     
     void add_conductance(int &node1, int &node2, Component *c)
     {
-        if(c->get_type() == 'R')
+        if(c->get_type() == 'R' || c->get_type() == 'D')
         {
             if(node1 && node2)
             {
@@ -162,7 +161,36 @@ private:
                     Currents(node2-1) -= current;
             }
         }
-        
+        for(int i = 0; i < non_linear.size(); i++)
+        {
+            Component *c = non_linear[i];
+            
+            if(c->get_type() == 'D')
+            {
+                int node1 = node_number(c->get_n1());
+                int node2 = node_number(c->get_n2());
+                
+                if(node1)
+                {
+                    double *current = new double;
+                    *current = c->get_I();
+                
+                    Currents(node1-1) += *current;
+                
+                    delete current;
+                }
+                if(node2)
+                {
+
+                    double *current = new double;
+                    *current = -c->get_I();
+                    
+                    Currents(node2-1) += *current;
+                    
+                    delete current;
+                }
+            }
+        }
     }
     
     void add_V(double &time)
@@ -252,12 +280,105 @@ private:
         }
     }
     
+    //clears conductance matrix and current vector for a new iteration of newton_iterate()
+    void nl_clear(Component *c)
+    {
+        int node1 = node_number(c->get_n1());
+        int node2 = node_number(c->get_n2());
+        
+        if(node1 && node2)
+            Conductances(node1-1, node2-1) += c->compute_conductance();
+            Conductances(node2-1, node1-1) += c->compute_conductance();
+        
+        if(node1)
+        {
+            Conductances(node1-1, node1-1) -= c->compute_conductance();
+            Currents(node1-1) -= c->get_I();
+        }
+        if(node2)
+        {
+            Conductances(node2-1, node2-1) -= c->compute_conductance();
+            Currents(node2-1) += c->get_I();
+        }
+    }
+    
+    //fills conductance matrix and current vector during new iteration of newton_iterate()
+    void nl_fill(Component *c)
+    {
+        int node1 = node_number(c->get_n1());
+        int node2 = node_number(c->get_n2());
+        
+        if(node1 && node2)
+            Conductances(node1-1, node2-1) -= c->compute_conductance();
+            Conductances(node2-1, node1-1) -= c->compute_conductance();
+        
+        if(node1)
+        {
+            Conductances(node1-1, node1-1) += c->compute_conductance();
+            Currents(node1-1) += c->get_I();
+        }
+        if(node2)
+        {
+            Conductances(node2-1, node2-1) += c->compute_conductance();
+            Currents(node2-1) -= c->get_I();
+        }
+    }
+    
+    void newton_iterate()
+    {
+        //new implementation
+        bool ok = 1;
+        
+        while (ok)
+        {
+            Eigen::VectorXd nlv = Voltages;
+            double vd;
+            
+            for(int i = 0; i < non_linear.size(); i++)
+            {
+                Component *c = non_linear[i];
+                
+                int node1 = node_number(c->get_n1());
+                int node2 = node_number(c->get_n2());
+                
+                if(node1 && node2)
+                    vd = nlv(node1-1) - nlv(node2-1);
+                else
+                {
+                    if(node1)
+                        vd = nlv(node1-1);
+                    else
+                        vd = -nlv(node2-1);
+                }
+                
+                nl_clear(c);
+                c->d_iterate(vd);
+                nl_fill(c);
+            }
+            
+            Voltages = Conductances.householderQr().solve(Currents);
+            
+            ok = 0;
+            for(int i = 0; i < non_linear.size(); i++)
+            {
+                Component *c = non_linear[i];
+                
+                int node1 = node_number(c->get_n1());
+                int node2 = node_number(c->get_n2());
+                
+                if(abs((Voltages(node1-1) - Voltages(node2-1))-(nlv(node1-1) - nlv(node2-1))) > 0.00001)
+                    ok = 1;
+            }
+        }
+    }
+    
 public:
     Nodes()
     {
         Size = 0;
         nSources = 0;
         dt = 0;
+        is_non_linear = 0;
     }
     
     /*
@@ -298,7 +419,8 @@ public:
         
         if(c->get_type() == 'I' || c->get_type() == 'C')
             current_sources.push_back(c);
-        if(c->get_type() == 'R')
+        
+        if(c->get_type() == 'R' || c->get_type() == 'D')
             add_conductance(node1, node2, c);
         
         if(c->get_type() == 'V' || c->get_type() == 'L')
@@ -307,6 +429,11 @@ public:
             voltage_sources.push_back(make_pair(c, nSources));
         }
         
+        if(c->get_type() == 'D')
+        {
+            is_non_linear = 1;
+            non_linear.push_back(c);
+        }
     }
     
     void compute_size()
@@ -320,6 +447,7 @@ public:
         Resize();
     }
     
+    //can be removed, only used for .op testing
     void compute_voltages()
     {
         double time = 0;
@@ -335,7 +463,6 @@ public:
     {
         dt = t;
         
-        //testing
         for(int i = 0; i < current_sources.size(); i++)
         {
             Component *c = current_sources[i];
@@ -370,6 +497,9 @@ public:
         add_V(time);
         
         Voltages = Conductances.householderQr().solve(Currents);
+        
+        if(is_non_linear)
+            newton_iterate();
         
         voltage_history.push_back(Voltages);
     }
