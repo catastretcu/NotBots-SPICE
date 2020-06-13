@@ -14,10 +14,13 @@ simfile = importdata(datafile,'\t',1);
 simdata = simfile.data;
 
 %Loop over columns of data
-figure;
+figure('Name', 'Simulation Results','NumberTitle','off');
 for n = 2:(size(simdata,2))
     subplot(size(simdata,2),1,n);   %Add a set of axes
-    plot(simdata(:,1),simdata(:,n)); %Add the data
+    plot(simdata(:,1),simdata(:,n),'LineWidth', 1.75,'Color',rand(1,3)); %Add the data
+    grid on;
     ylabel(simfile.colheaders(n));  %Label the Y axis with the column header
+    title(simfile.colheaders(n));
+    xlabel(" "+newline+" ");
 end
 xlabel('Time (s)'); %Label the x axis of the bottom plot
